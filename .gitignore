@@ -16,6 +16,9 @@ npm-debug.log*
 .idea/
 *.local
 
+# Claude Code (config local)
+.claude/
+
 # Variáveis de ambiente
 .env
 .env.*
