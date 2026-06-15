@@ -313,9 +313,9 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
 
       // Três cartões de métricas lado a lado
       const cards = [
-        { label: 'KPIs Atingidos', value: String(pagos), sub: 'com realização ≥ gatilho', color: MRV_COLORS.green, bg: MRV_COLORS.greenSoft },
-        { label: 'KPIs Não Atingidos', value: String(cortados), sub: 'abaixo do gatilho', color: MRV_COLORS.red, bg: '#FDECEA' },
-        { label: 'Bônus Potencial', value: `${bonusPct.toFixed(1)}%`, sub: 'do total ponderado', color: MRV_COLORS.orange, bg: '#FFF3E0' },
+        { label: 'KPIs Atingidos', value: String(pagos), color: MRV_COLORS.green, bg: MRV_COLORS.greenSoft },
+        { label: 'KPIs Não Atingidos', value: String(cortados), color: MRV_COLORS.red, bg: '#FDECEA' },
+        { label: 'Bônus Potencial', value: `${bonusPct.toFixed(1)}%`, color: MRV_COLORS.orange, bg: '#FFF3E0' },
       ] as const
 
       const cW = (pageW - mg * 2 - 16) / 3
@@ -335,11 +335,7 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
         doc.setFont('helvetica', 'bold')
         doc.setFontSize(26)
         doc.setTextColor(card.color)
-        doc.text(card.value, cX + cW / 2, cY + 30, { align: 'center' })
-        doc.setFont('helvetica', 'normal')
-        doc.setFontSize(7.5)
-        doc.setTextColor('#888888')
-        doc.text(card.sub, cX + cW / 2, cY + 42, { align: 'center' })
+        doc.text(card.value, cX + cW / 2, cY + 32, { align: 'center' })
       })
 
       // Indicadores por status (mini-tabela textual)
