@@ -23,6 +23,13 @@ function bandClass(pct: number): string {
   return 'band-green'
 }
 
+/** Rótulo de projeção conforme a faixa. */
+function projectionLabel(pct: number): string {
+  if (pct < 50) return 'Projeção: crítica'
+  if (pct < 80) return 'Projeção: em atenção'
+  return 'Projeção: no prazo'
+}
+
 const R = 80
 const CX = 100
 const CY = 100
@@ -42,32 +49,33 @@ export default function BonusGauge({ kpis }: Props) {
 
   return (
     <div className={`bonus-gauge ${band}`}>
-      <h3 className="bonus-title">Bônus potencial estimado</h3>
-
-      <div className="gauge-svg-wrap">
-        <svg viewBox="0 0 200 120" className="gauge-svg" role="img"
-             aria-label={`Bônus potencial: ${percentualBonus.toFixed(1)}%`}>
-          <path
-            className="gauge-track"
-            d={arcPath}
-            fill="none"
-            strokeWidth={12}
-            strokeLinecap="round"
-          />
-          <path
-            className="gauge-progress"
-            d={arcPath}
-            fill="none"
-            strokeWidth={12}
-            strokeLinecap="round"
-            strokeDasharray={ARC_LENGTH}
-            strokeDashoffset={offset}
-          />
-        </svg>
-        <div className="gauge-center">
-          <span className="gauge-value">{percentualBonus.toFixed(1)}%</span>
-          <span className="gauge-label">do bônus máximo</span>
+      <div className="gauge-hero">
+        <div className="gauge-svg-wrap">
+          <svg viewBox="0 0 200 120" className="gauge-svg" role="img"
+               aria-label={`Bônus potencial: ${percentualBonus.toFixed(1)}%`}>
+            <path
+              className="gauge-track"
+              d={arcPath}
+              fill="none"
+              strokeWidth={12}
+              strokeLinecap="round"
+            />
+            <path
+              className="gauge-progress"
+              d={arcPath}
+              fill="none"
+              strokeWidth={12}
+              strokeLinecap="round"
+              strokeDasharray={ARC_LENGTH}
+              strokeDashoffset={offset}
+            />
+          </svg>
+          <div className="gauge-center">
+            <span className="gauge-value">{percentualBonus.toFixed(1)}%</span>
+            <span className="gauge-label">Bônus potencial</span>
+          </div>
         </div>
+        <div className="gauge-projection">{projectionLabel(percentualBonus)}</div>
       </div>
 
       <ul className="gauge-list">

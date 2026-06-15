@@ -1,82 +1,133 @@
-.tbl-wrap {
-  background: var(--mrv-white);
-  border: 0.5px solid var(--mrv-border);
+/* Painel branco reutilizável (tabela e donut) */
+.panel {
+  background: var(--m3-surface-container-lowest);
+  border: 1px solid var(--m3-outline-variant);
   border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
+  height: 100%;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--m3-outline-variant);
+  background: var(--m3-surface-container-low);
+}
+
+.panel-title {
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 500;
+  color: var(--m3-primary);
+}
+
+.panel-chip {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--mrv-green-soft);
+  color: var(--m3-primary);
+}
+
+.tbl-wrap {
+  overflow-x: auto;
 }
 
 .tbl {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
-}
-
-.tbl thead {
-  background: var(--mrv-bg);
 }
 
 .tbl th {
-  padding: 10px 14px;
   text-align: left;
-  font-weight: 500;
-  color: var(--text-muted);
+  padding: 16px 24px;
   font-size: 12px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
-  border-bottom: 0.5px solid var(--mrv-border);
+  letter-spacing: 0.05em;
+  color: var(--m3-on-surface-variant);
+  border-bottom: 1px solid var(--m3-outline-variant);
 }
 
 .tbl td {
-  padding: 10px 14px;
-  border-bottom: 0.5px solid var(--track-line);
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--track-line);
+  font-size: 14px;
 }
 
-.tbl tr:last-child td {
+.tbl tbody tr {
+  transition: background 0.15s ease;
+}
+
+.tbl tbody tr:hover {
+  background: var(--m3-surface-container-low);
+}
+
+.tbl tbody tr:last-child td {
   border-bottom: none;
 }
 
+.ta-right { text-align: right; }
+
 .tbl-name {
-  font-weight: 500;
-  max-width: 200px;
+  font-weight: 600;
+  color: var(--m3-on-surface);
 }
 
-.peso-bar {
+.tbl-peso { min-width: 160px; }
+
+.peso-cell {
   display: flex;
   align-items: center;
-  gap: 6px;
-}
-
-.peso-fill {
-  height: 6px;
-  border-radius: 3px;
-  background: var(--mrv-green);
+  gap: 12px;
 }
 
 .peso-txt {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
-  color: var(--mrv-green);
-  min-width: 36px;
+  color: var(--m3-on-surface);
+  width: 44px;
+  font-variant-numeric: tabular-nums;
+}
+
+.peso-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--m3-surface-container-highest);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.peso-fill {
+  height: 100%;
+  background: var(--m3-primary-container);
+  border-radius: var(--radius);
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .peso-na {
-  color: var(--text-faint);
-  font-size: 12px;
+  color: var(--m3-on-surface-variant);
+  opacity: 0.6;
 }
 
 .gat-badge {
-  background: var(--surface-muted);
-  color: var(--text-muted);
-  padding: 2px 8px;
-  border-radius: 8px;
-  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 700;
+  background: var(--mrv-green-soft);
+  color: var(--m3-primary);
+  font-variant-numeric: tabular-nums;
 }
 
-.tot-row {
-  background: var(--mrv-bg);
-}
-
-.tot-row td {
-  font-weight: 600;
-  border-top: 2px solid var(--mrv-green) !important;
+.gat-badge.gat-low {
+  background: var(--mrv-orange-soft);
+  color: var(--m3-secondary);
 }

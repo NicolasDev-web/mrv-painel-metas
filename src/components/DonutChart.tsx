@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react'
 import { KPI } from '../types'
 import './DonutChart.css'
 
@@ -7,67 +6,60 @@ interface Props {
   theme?: string
 }
 
-const COLORS = ['#0B5A42', '#1A7A5A', '#A8D5C2', '#F39200', '#F5B041', '#E67E22', '#D5D5D5']
+const COLORS = ['#00412e', '#0b5a42', '#236a51', '#8a5100', '#fc9910', '#ffb86e', '#bfc9c2']
 
-export default function DonutChart({ kpis, theme }: Props) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+const R = 40
+const CIRC = 2 * Math.PI * R // ~251.33
+
+export default function DonutChart({ kpis }: Props) {
   const items = kpis.filter(k => k.peso !== null)
   const total = items.reduce((s, k) => s + (k.peso ?? 0), 0)
 
-  useEffect(() => {
-    const c = canvasRef.current
-    if (!c) return
-    const ctx = c.getContext('2d')
-    if (!ctx) return
-
-    const cs = getComputedStyle(c)
-    const surface = cs.getPropertyValue('--surface').trim() || '#fff'
-    const centerText = cs.getPropertyValue('--mrv-green').trim() || '#0B5A42'
-    const subText = cs.getPropertyValue('--mrv-gray-light').trim() || '#888'
-
-    const dpr = window.devicePixelRatio || 1
-    c.width = 180 * dpr
-    c.height = 180 * dpr
-    ctx.scale(dpr, dpr)
-
-    const cx = 90, cy = 90, r = 70, r2 = 45
-    let start = -Math.PI / 2
-
-    items.forEach((k, i) => {
-      const angle = ((k.peso ?? 0) / total) * 2 * Math.PI
-      ctx.beginPath()
-      ctx.moveTo(cx, cy)
-      ctx.arc(cx, cy, r, start, start + angle)
-      ctx.closePath()
-      ctx.fillStyle = COLORS[i % COLORS.length]
-      ctx.fill()
-      start += angle
-    })
-
-    ctx.beginPath()
-    ctx.arc(cx, cy, r2, 0, 2 * Math.PI)
-    ctx.fillStyle = surface
-    ctx.fill()
-
-    ctx.fillStyle = centerText
-    ctx.font = '500 20px system-ui'
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'middle'
-    ctx.fillText(total + '%', cx, cy - 6)
-    ctx.fillStyle = subText
-    ctx.font = '11px system-ui'
-    ctx.fillText('alocado', cx, cy + 10)
-  }, [items, total, theme])
+  let acc = 0
+  const segments = items.map((k, i) => {
+    const frac = (k.peso ?? 0) / total
+    const dash = frac * CIRC
+    const offset = -acc * CIRC
+    acc += frac
+    return { id: k.id, color: COLORS[i % COLORS.length], dash, offset }
+  })
 
   return (
-    <div className="donut-wrap">
-      <h3 className="donut-title">Distribuição dos pesos</h3>
-      <canvas ref={canvasRef} width={180} height={180} style={{ width: 180, height: 180 }} />
+    <div className="panel donut-panel">
+      <div className="donut-head">
+        <h2 className="panel-title">Pesos e Alocação</h2>
+        <p className="donut-sub">Distribuição percentual da carteira de indicadores</p>
+      </div>
+
+      <div className="donut-chart">
+        <svg viewBox="0 0 100 100" className="donut-svg">
+          <circle cx="50" cy="50" r={R} fill="none"
+            stroke="var(--m3-surface-container-highest)" strokeWidth={12} />
+          {segments.map(s => (
+            <circle
+              key={s.id}
+              cx="50" cy="50" r={R}
+              fill="none"
+              stroke={s.color}
+              strokeWidth={12}
+              strokeDasharray={`${s.dash} ${CIRC - s.dash}`}
+              strokeDashoffset={s.offset}
+            />
+          ))}
+        </svg>
+        <div className="donut-center">
+          <span className="donut-total">{total}%</span>
+          <span className="donut-total-label">Alocado</span>
+        </div>
+      </div>
+
       <div className="donut-legend">
         {items.map((k, i) => (
           <div key={k.id} className="donut-legend-item">
             <span className="donut-dot" style={{ background: COLORS[i % COLORS.length] }} />
-            <span>{k.peso}% {k.name.length > 24 ? k.name.slice(0, 24) + '…' : k.name}</span>
+            <span className="donut-legend-text">
+              {k.name} ({k.peso}%)
+            </span>
           </div>
         ))}
       </div>

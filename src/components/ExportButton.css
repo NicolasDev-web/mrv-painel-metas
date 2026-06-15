@@ -6,22 +6,22 @@
 .export-btn {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  background: transparent;
-  color: #fff;
-  border: 1.5px solid rgba(255, 255, 255, 0.55);
-  border-radius: 20px;
-  padding: 7px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
+  gap: 6px;
+  background: var(--m3-primary);
+  color: var(--m3-on-primary);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .export-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: #fff;
+  background: var(--m3-primary-container);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .export-btn svg {
@@ -33,11 +33,11 @@
   top: calc(100% + 8px);
   right: 0;
   z-index: 100;
-  min-width: 180px;
-  background: var(--surface, #fff);
-  border: 0.5px solid var(--mrv-border, #e0e0e0);
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  min-width: 190px;
+  background: var(--m3-surface-container-lowest);
+  border: 1px solid var(--m3-outline-variant);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
   padding: 6px;
   display: flex;
   flex-direction: column;
@@ -51,16 +51,16 @@
   text-align: left;
   background: transparent;
   border: none;
-  border-radius: 7px;
-  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
   font-size: 13px;
   font-weight: 500;
-  color: var(--mrv-gray, #333);
+  color: var(--m3-on-surface);
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .export-item:hover {
-  background: var(--surface-muted, #f5f5f5);
-  color: var(--mrv-green, #0b5a42);
+  background: var(--m3-surface-container-low);
+  color: var(--m3-primary);
 }
