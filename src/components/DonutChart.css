@@ -1,0 +1,37 @@
+.donut-wrap {
+  background: var(--mrv-white);
+  border: 0.5px solid var(--mrv-border);
+  border-radius: var(--radius);
+  padding: 20px;
+  text-align: center;
+}
+
+.donut-title {
+  font-size: 13px;
+  color: var(--mrv-gray-light);
+  margin-bottom: 14px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.donut-legend {
+  margin-top: 12px;
+  text-align: left;
+}
+
+.donut-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0;
+  font-size: 11px;
+  color: var(--mrv-gray-light);
+}
+
+.donut-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}

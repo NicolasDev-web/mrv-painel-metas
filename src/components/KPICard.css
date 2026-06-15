@@ -1,0 +1,130 @@
+.kpi-card {
+  background: var(--mrv-white);
+  border: 0.5px solid var(--mrv-border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 10px;
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+.kpi-card.status-below { border-left: 4px solid var(--mrv-red); }
+.kpi-card.status-range { border-left: 4px solid var(--mrv-green); }
+.kpi-card.status-above { border-left: 4px solid var(--mrv-orange); }
+
+.kpi-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.kpi-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--mrv-gray);
+}
+
+.kpi-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.badge-peso {
+  background: var(--mrv-orange-soft);
+  color: #E65100;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.badge-gatilho {
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
+.kpi-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.kpi-slider-row label {
+  font-size: 12px;
+  color: var(--mrv-gray-light);
+  min-width: 72px;
+}
+
+.kpi-slider-row input[type="range"] {
+  flex: 1;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.kpi-slider-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--mrv-green);
+  cursor: pointer;
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.kpi-slider-row input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--mrv-green);
+  cursor: pointer;
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.slider-val {
+  font-size: 15px;
+  font-weight: 500;
+  min-width: 48px;
+  text-align: right;
+}
+
+.progress-wrap {
+  height: 8px;
+  background: var(--track);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.progress-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+.kpi-status {
+  display: flex;
+  align-items: center;
+}
+
+.status-tag {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
