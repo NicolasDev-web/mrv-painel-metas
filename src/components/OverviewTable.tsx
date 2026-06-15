@@ -14,7 +14,6 @@ export default function OverviewTable({ kpis }: Props) {
         <thead>
           <tr>
             <th>KPI</th>
-            <th>Bloco</th>
             <th>Peso</th>
             <th>Gatilho</th>
           </tr>
@@ -23,11 +22,6 @@ export default function OverviewTable({ kpis }: Props) {
           {kpis.map(k => (
             <tr key={k.id}>
               <td className="tbl-name">{k.name}</td>
-              <td>
-                <span className={`cat ${k.bloco === 'Cluster' ? 'cat-cl' : 'cat-sp'}`}>
-                  {k.bloco}
-                </span>
-              </td>
               <td>
                 {k.peso !== null ? (
                   <div className="peso-bar">
@@ -45,7 +39,6 @@ export default function OverviewTable({ kpis }: Props) {
           ))}
           <tr className="tot-row">
             <td>Total</td>
-            <td></td>
             <td><span className="peso-txt">{totalPeso}%</span></td>
             <td></td>
           </tr>

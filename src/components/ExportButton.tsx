@@ -117,12 +117,11 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
       y += 5
 
       const cols = [
-        { label: 'KPI', w: 90 },
-        { label: 'Bloco', w: 32 },
-        { label: 'Peso', w: 22 },
-        { label: 'Gatilho', w: 25 },
-        { label: 'Realização', w: 30 },
-        { label: 'Status', w: 74 },
+        { label: 'KPI', w: 104 },
+        { label: 'Peso', w: 26 },
+        { label: 'Gatilho', w: 28 },
+        { label: 'Realização', w: 34 },
+        { label: 'Status', w: 81 },
       ]
       const tableX = margin
       const rowH = 8
@@ -153,13 +152,12 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
         doc.setTextColor(MRV_COLORS.gray)
         doc.setFontSize(8.5)
         doc.text(kpi.name, colX(0) + 2, y + 5.5, { maxWidth: cols[0].w - 4 })
-        doc.text(kpi.bloco, colX(1) + 2, y + 5.5)
-        doc.text(fmtPeso(kpi.peso), colX(2) + 2, y + 5.5)
-        doc.text(`${kpi.gatilho}%`, colX(3) + 2, y + 5.5)
-        doc.text(`${kpi.valor}%`, colX(4) + 2, y + 5.5)
+        doc.text(fmtPeso(kpi.peso), colX(1) + 2, y + 5.5)
+        doc.text(`${kpi.gatilho}%`, colX(2) + 2, y + 5.5)
+        doc.text(`${kpi.valor}%`, colX(3) + 2, y + 5.5)
         doc.setTextColor(statusHex(status))
         doc.setFont('helvetica', 'bold')
-        doc.text(getStatusLabel(status), colX(5) + 2, y + 5.5)
+        doc.text(getStatusLabel(status), colX(4) + 2, y + 5.5)
         doc.setFont('helvetica', 'normal')
         y += rowH
       })
@@ -172,7 +170,7 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(9)
       doc.text('Total', colX(0) + 2, y + 5.5)
-      doc.text(`${totalPeso.toFixed(1)}%`, colX(2) + 2, y + 5.5)
+      doc.text(`${totalPeso.toFixed(1)}%`, colX(1) + 2, y + 5.5)
       y += rowH + 12
 
       // ---- Seção 2: Resumo do Bônus Potencial ----
@@ -261,7 +259,7 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
       })
 
       const headerCells: PptxGenJS.TableCell[] = [
-        'KPI', 'Bloco', 'Peso', 'Gatilho', 'Realização', 'Status',
+        'KPI', 'Peso', 'Gatilho', 'Realização', 'Status',
       ].map(t => ({
         text: t,
         options: { bold: true, color: MRV_COLORS.white, fill: { color: MRV_COLORS.green }, align: 'center', valign: 'middle' },
@@ -273,7 +271,6 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
         const base: PptxGenJS.TableCellProps = { color: MRV_COLORS.gray, fill, valign: 'middle', fontSize: 11 }
         return [
           { text: kpi.name, options: { ...base, align: 'left' } },
-          { text: kpi.bloco, options: { ...base, align: 'center' } },
           { text: fmtPeso(kpi.peso), options: { ...base, align: 'center' } },
           { text: `${kpi.gatilho}%`, options: { ...base, align: 'center' } },
           { text: `${kpi.valor}%`, options: { ...base, align: 'center' } },
@@ -283,7 +280,7 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
 
       tbl.addTable([headerCells, ...bodyRows], {
         x: 0.5, y: 1.1, w: slideW - 1,
-        colW: [4.6, 1.6, 1.4, 1.6, 1.8, 2.33],
+        colW: [5.2, 1.6, 1.8, 2.0, 2.73],
         border: { type: 'solid', color: MRV_COLORS.bg, pt: 1 },
         autoPage: false,
       })

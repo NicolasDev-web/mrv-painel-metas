@@ -40,24 +40,6 @@
   max-width: 200px;
 }
 
-.cat {
-  font-size: 10px;
-  padding: 3px 8px;
-  border-radius: 8px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.cat-cl {
-  background: var(--mrv-green-soft);
-  color: var(--mrv-green);
-}
-
-.cat-sp {
-  background: var(--mrv-orange-soft);
-  color: #E65100;
-}
-
 .peso-bar {
   display: flex;
   align-items: center;

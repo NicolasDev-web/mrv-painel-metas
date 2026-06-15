@@ -4,7 +4,6 @@ export interface KPI {
   peso: number | null
   gatilho: number
   valor: number
-  bloco: 'Cluster' | 'Comercial'
 }
 
 export type KPIStatus = 'below' | 'range' | 'above'

@@ -4,7 +4,7 @@ import OverviewTable from './components/OverviewTable'
 import KPICard from './components/KPICard'
 import ExportButton from './components/ExportButton'
 import BonusGauge from './components/BonusGauge'
-import { clusterKPIs, specificKPIs } from './data'
+import { kpis as initialKPIs } from './data'
 import { KPI, getStatus } from './types'
 import './App.css'
 
@@ -24,14 +24,10 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem('mrv-theme', theme)
   }, [theme])
-  const [cluster, setCluster] = useState<KPI[]>(clusterKPIs.map(k => ({ ...k })))
-  const [specific, setSpecific] = useState<KPI[]>(specificKPIs.map(k => ({ ...k })))
-
-  const allKPIs = [...cluster, ...specific]
+  const [allKPIs, setAllKPIs] = useState<KPI[]>(initialKPIs.map(k => ({ ...k })))
 
   const handleChange = (id: string, valor: number) => {
-    setCluster(prev => prev.map(k => k.id === id ? { ...k, valor } : k))
-    setSpecific(prev => prev.map(k => k.id === id ? { ...k, valor } : k))
+    setAllKPIs(prev => prev.map(k => k.id === id ? { ...k, valor } : k))
   }
 
   const totalPeso = allKPIs.reduce((s, k) => s + (k.peso ?? 0), 0)
@@ -118,23 +114,14 @@ export default function App() {
           </div>
 
           {/* Bonus Gauge */}
-          <BonusGauge kpis={[...cluster, ...specific]} />
+          <BonusGauge kpis={allKPIs} />
 
-          {/* Cluster KPIs */}
-          <div className="section-header">
-            <span>📊</span>
-            <h2>Metas por cluster</h2>
-          </div>
-          {cluster.map(kpi => (
-            <KPICard key={kpi.id} kpi={kpi} onValueChange={handleChange} />
-          ))}
-
-          {/* Specific KPIs */}
+          {/* KPIs */}
           <div className="section-header">
             <span>🎯</span>
-            <h2>Metas específicas — comercial</h2>
+            <h2>Metas comerciais</h2>
           </div>
-          {specific.map(kpi => (
+          {allKPIs.map(kpi => (
             <KPICard key={kpi.id} kpi={kpi} onValueChange={handleChange} />
           ))}
 
