@@ -381,7 +381,6 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
       doc.rect(mg, pqY, 4, 30, 'F')
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(9)
-      doc.setTextColor('rgba(255,255,255,0.75)' as string)
       doc.setTextColor('#CCCCCC')
       doc.text('Bônus potencial estimado para o cenário simulado:', mg + 10, pqY + 11)
       doc.setFont('helvetica', 'bold')
