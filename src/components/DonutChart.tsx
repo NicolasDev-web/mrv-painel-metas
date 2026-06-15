@@ -27,7 +27,7 @@ export default function DonutChart({ kpis }: Props) {
   return (
     <div className="panel donut-panel">
       <div className="donut-head">
-        <h2 className="panel-title">Pesos e Alocação</h2>
+        <h2 className="panel-title">Metas</h2>
         <p className="donut-sub">Distribuição percentual da carteira de indicadores</p>
       </div>
 

@@ -134,7 +134,7 @@ export default function App() {
                 <span className="sum-value">{allKPIs.length}</span>
               </div>
               <div className="sum-card">
-                <span className="sum-label">Peso alocado</span>
+                <span className="sum-label">Meta Desejável</span>
                 <span className="sum-value">{totalPeso}%</span>
               </div>
               <div className="sum-card tone-green">
