@@ -185,7 +185,7 @@ export default function App() {
             </div>
             <div className="legend-item">
               <span className="legend-dot tone-green" />
-              Verde: no range
+              Verde: dentro da meta
             </div>
             <div className="legend-item">
               <span className="legend-dot tone-orange" />

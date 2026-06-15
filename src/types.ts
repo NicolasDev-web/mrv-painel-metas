@@ -17,7 +17,7 @@ export function getStatus(valor: number, gatilho: number): KPIStatus {
 export function getStatusLabel(status: KPIStatus): string {
   switch (status) {
     case 'below': return 'Abaixo do gatilho'
-    case 'range': return 'No range'
+    case 'range': return 'Dentro da meta'
     case 'above': return 'Acima da meta'
   }
 }
