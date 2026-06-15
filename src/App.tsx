@@ -181,7 +181,7 @@ export default function App() {
           <div className="footer-legend">
             <div className="legend-item">
               <span className="legend-dot tone-red" />
-              Vermelho: abaixo do gatilho
+              Vermelho: abaixo de meta
             </div>
             <div className="legend-item">
               <span className="legend-dot tone-green" />
