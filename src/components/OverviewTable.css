@@ -116,6 +116,20 @@
   opacity: 0.6;
 }
 
+.tbl-meta {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--m3-on-surface);
+  font-variant-numeric: tabular-nums;
+}
+
+.tbl-realizado {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--m3-on-surface-variant);
+  font-variant-numeric: tabular-nums;
+}
+
 .gat-badge {
   display: inline-flex;
   align-items: center;

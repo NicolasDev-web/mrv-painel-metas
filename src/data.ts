@@ -3,12 +3,12 @@ import { KPI } from './types'
 export const kpis: KPI[] = [
   {
     id: 'ro',
-    name: 'Resultado operacional ($MM)',
+    name: 'Resultado operacional ($M)',
     peso: 25.0,
     gatilho: 90,
     valor: 50,
-    metaLabel: 'R$ 850 MM',
-    realizadoLabel: 'R$ 425 MM',
+    metaLabel: 'R$ 850 M',
+    realizadoLabel: 'R$ 425 M',
   },
   {
     id: 'mb',

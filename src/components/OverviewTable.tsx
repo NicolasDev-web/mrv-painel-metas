@@ -18,6 +18,8 @@ export default function OverviewTable({ kpis }: Props) {
             <tr>
               <th>Indicador KPI</th>
               <th>Peso</th>
+              <th className="ta-right">Meta</th>
+              <th className="ta-right">Realizado</th>
               <th className="ta-right">Gatilho (LI)</th>
             </tr>
           </thead>
@@ -38,6 +40,12 @@ export default function OverviewTable({ kpis }: Props) {
                     ) : (
                       <span className="peso-na">—</span>
                     )}
+                  </td>
+                  <td className="ta-right">
+                    <span className="tbl-meta">{k.metaLabel ?? '—'}</span>
+                  </td>
+                  <td className="ta-right">
+                    <span className="tbl-realizado">{k.realizadoLabel ?? '—'}</span>
                   </td>
                   <td className="ta-right">
                     <span className={`gat-badge ${low ? 'gat-low' : ''}`}>
