@@ -31,6 +31,23 @@ export default function KPICard({ kpi, onValueChange }: Props) {
         </span>
       </div>
 
+      {(kpi.metaLabel || kpi.realizadoLabel) && (
+        <div className="kpi-meta-row">
+          {kpi.metaLabel && (
+            <div className="kpi-meta-item">
+              <span className="kpi-meta-key">Meta</span>
+              <span className="kpi-meta-val">{kpi.metaLabel}</span>
+            </div>
+          )}
+          {kpi.realizadoLabel && (
+            <div className="kpi-meta-item">
+              <span className="kpi-meta-key">Realizado</span>
+              <span className="kpi-meta-val kpi-meta-realizado">{kpi.realizadoLabel}</span>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="kpi-body">
         <div className="kpi-value-row">
           <span className="kpi-value-label">Atingimento simulado</span>

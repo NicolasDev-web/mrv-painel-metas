@@ -3,7 +3,7 @@
   --status-bg: var(--mrv-green-soft);
   background: var(--m3-surface-container-lowest);
   border: 1px solid var(--m3-outline-variant);
-  border-left: 4px solid var(--status-color);
+  border-left: 6px solid var(--status-color);
   border-radius: var(--radius);
   padding: 20px;
   box-shadow: var(--shadow-sm);
@@ -43,10 +43,48 @@
 }
 
 .kpi-name {
-  font-size: 16px;
+  font-family: var(--font-display);
+  font-size: 17px;
   line-height: 1.2;
   font-weight: 700;
   color: var(--m3-on-surface);
+}
+
+/* Bloco de valores meta/realizado */
+.kpi-meta-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  background: var(--m3-surface-container);
+  border-radius: var(--radius-sm);
+}
+
+.kpi-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.kpi-meta-key {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--m3-on-surface-variant);
+}
+
+.kpi-meta-val {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--m3-on-surface);
+  font-variant-numeric: tabular-nums;
+}
+
+.kpi-meta-realizado {
+  color: var(--status-color);
 }
 
 .kpi-badges {

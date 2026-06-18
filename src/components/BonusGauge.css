@@ -51,19 +51,22 @@
 }
 
 .gauge-value {
-  font-size: 48px;
+  font-family: var(--font-display);
+  font-size: 72px;
   font-weight: 900;
-  color: var(--m3-on-surface);
+  color: var(--gauge-color);
   line-height: 1;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
 }
 
 .gauge-label {
-  font-size: 12px;
-  letter-spacing: 0.12em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--m3-on-surface-variant);
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .gauge-projection {

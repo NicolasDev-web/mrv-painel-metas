@@ -1,4 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
+  /* ---- Tipografia ---- */
+  --font-display: 'Barlow', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+
   /* ---- Paleta Material 3 (MRV) ---- */
   --m3-primary: #00412e;
   --m3-primary-container: #0b5a42;
@@ -111,7 +117,7 @@
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
   background: var(--m3-background);
   color: var(--m3-on-background);
   min-height: 100vh;

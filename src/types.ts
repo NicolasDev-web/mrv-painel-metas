@@ -4,6 +4,8 @@ export interface KPI {
   peso: number | null
   gatilho: number
   valor: number
+  metaLabel?: string
+  realizadoLabel?: string
 }
 
 export type KPIStatus = 'below' | 'range' | 'above'
