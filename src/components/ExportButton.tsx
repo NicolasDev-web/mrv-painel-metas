@@ -9,24 +9,44 @@ interface Props {
   scenarioName?: string
 }
 
-/** Paleta MRV — única fonte de cores deste módulo (sem hex soltos no código). */
+/**
+ * Paleta MRV — única fonte de cores deste módulo.
+ * PDF usa strings com '#'. pptxgenjs exige hex SEM '#'.
+ */
 const MRV_COLORS = {
-  green: '#0B5A42',
+  // com '#' → para jsPDF
+  green:     '#00412E',
+  greenDark: '#1A3A2D',
   greenSoft: '#E8F5E9',
-  orange: '#F39200',
-  red: '#D32F2F',
-  white: '#FFFFFF',
-  bg: '#F5F5F5',
-  gray: '#333333',
-  rowAlt: '#F5F5F5',
+  orange:    '#FC9910',
+  red:       '#D32F2F',
+  white:     '#FFFFFF',
+  bg:        '#F5F5F5',
+  gray:      '#333333',
+  // sem '#' → para pptxgenjs
+  pGreen:     '00412E',
+  pGreenDark: '1A3A2D',
+  pOrange:    'FC9910',
+  pRed:       'D32F2F',
+  pWhite:     'FFFFFF',
+  pGray:      '333333',
 } as const
 
-/** Cor de texto por status, reaproveitada no PDF e no PPTX. */
+/** Cor de texto por status (com '#') — para jsPDF. */
 function statusHex(status: KPIStatus): string {
   switch (status) {
     case 'below': return MRV_COLORS.red
     case 'range': return MRV_COLORS.green
     case 'above': return MRV_COLORS.orange
+  }
+}
+
+/** Cor de texto por status (sem '#') — para pptxgenjs. */
+function statusPptx(status: KPIStatus): string {
+  switch (status) {
+    case 'below': return MRV_COLORS.pRed
+    case 'range': return MRV_COLORS.pGreen
+    case 'above': return MRV_COLORS.pOrange
   }
 }
 
@@ -90,12 +110,11 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
       const pageW = 297
       const pageH = 210
-      const mg = 18 // margem generosa para respiro
+      const mg = 18
 
-      // ── utilidades de rodapé ──────────────────────────────────────────────
+      // ── rodapé ───────────────────────────────────────────────────────────
       function addFooter(pageNum: number, pageTotal: number) {
         doc.setPage(pageNum)
-        // linha divisória sutil
         doc.setDrawColor('#DDDDDD')
         doc.setLineWidth(0.3)
         doc.line(mg, pageH - 12, pageW - mg, pageH - 12)
@@ -109,61 +128,54 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
         )
       }
 
+      const { pagos, cortados, bonusPct, totalPeso } = summarize(kpis)
+
       // ════════════════════════════════════════════════════════════════════════
       // PÁGINA 1 — CAPA
       // ════════════════════════════════════════════════════════════════════════
 
-      // Fundo verde escuro total
       doc.setFillColor(MRV_COLORS.green)
       doc.rect(0, 0, pageW, pageH, 'F')
 
-      // Barra decorativa laranja lateral esquerda
       doc.setFillColor(MRV_COLORS.orange)
       doc.rect(0, 0, 6, pageH, 'F')
 
-      // Bloco branco "cartão" centralizado
       const cardX = 40
       const cardY = 35
       const cardW = pageW - 80
       const cardH = 115
-      doc.setFillColor('#FFFFFF')
+      doc.setFillColor(MRV_COLORS.white)
       doc.roundedRect(cardX, cardY, cardW, cardH, 4, 4, 'F')
 
       // Linha verde no topo do cartão
       doc.setFillColor(MRV_COLORS.green)
       doc.rect(cardX, cardY, cardW, 3, 'F')
 
-      // Label "RELATÓRIO DE METAS" pequeno e espaçado
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(7.5)
       doc.setTextColor(MRV_COLORS.orange)
       doc.text('RELATÓRIO DE METAS  ·  CICLO 2026', cardX + 18, cardY + 18, { charSpace: 1.5 })
 
-      // Título principal
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(28)
       doc.setTextColor(MRV_COLORS.green)
       doc.text('Painel de Metas', cardX + 18, cardY + 36)
       doc.text('Comerciais', cardX + 18, cardY + 50)
 
-      // Linha divisória no cartão
       doc.setDrawColor('#E0E0E0')
       doc.setLineWidth(0.4)
       doc.line(cardX + 18, cardY + 58, cardX + cardW - 18, cardY + 58)
 
-      // Subtítulo
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(11)
       doc.setTextColor('#555555')
       doc.text('Comercial Diretoria', cardX + 18, cardY + 70)
 
-      // Data
       doc.setFontSize(9.5)
       doc.setTextColor('#888888')
       doc.text(`Gerado em ${todayBR()}`, cardX + 18, cardY + 82)
 
       // Badge bônus
-      const { pagos, cortados, bonusPct } = summarize(kpis)
       const badgeX = cardX + cardW - 78
       const badgeY = cardY + 55
       doc.setFillColor(MRV_COLORS.greenSoft)
@@ -177,18 +189,16 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
       doc.setTextColor(MRV_COLORS.green)
       doc.text(`${bonusPct.toFixed(1)}%`, badgeX + 30, badgeY + 28, { align: 'center' })
 
-      // Marca MRV&CO no rodapé do cartão
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(10)
       doc.setTextColor(MRV_COLORS.orange)
       doc.text('MRV&CO', cardX + 18, cardY + cardH - 8)
 
       // ════════════════════════════════════════════════════════════════════════
-      // PÁGINA 2 — TABELA DETALHADA
+      // PÁGINA 2 — TABELA DETALHADA (com Meta e Realizado)
       // ════════════════════════════════════════════════════════════════════════
       doc.addPage()
 
-      // Header com faixa verde
       doc.setFillColor(MRV_COLORS.green)
       doc.rect(0, 0, pageW, 22, 'F')
       doc.setFillColor(MRV_COLORS.orange)
@@ -200,16 +210,19 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(8)
       doc.setTextColor(MRV_COLORS.orange)
-      doc.text('KPIs · Pesos · Realizações · Status', pageW - mg, 14, { align: 'right' })
+      doc.text('KPIs · Pesos · Meta · Realizado · Status', pageW - mg, 14, { align: 'right' })
 
-      // Tabela
+      // Colunas: total tableW = 297 - 18*2 = 261 mm
+      // KPI(62) + Grupo(26) + Peso(22) + Gatilho(22) + Meta(36) + Realizado(36) + Realiz%(28) + Status(29) = 261
       const cols = [
-        { label: 'KPI', w: 92 },
-        { label: 'Grupo', w: 34 },
-        { label: 'Peso', w: 28 },
-        { label: 'Gatilho', w: 28 },
-        { label: 'Realização', w: 36 },
-        { label: 'Status', w: 52 },
+        { label: 'KPI',        w: 62 },
+        { label: 'Grupo',      w: 26 },
+        { label: 'Peso',       w: 22 },
+        { label: 'Gatilho',    w: 22 },
+        { label: 'Meta',       w: 36 },
+        { label: 'Realizado',  w: 36 },
+        { label: 'Realiz. %',  w: 28 },
+        { label: 'Status',     w: 29 },
       ]
       const tableX = mg
       const tableW = pageW - mg * 2
@@ -220,12 +233,12 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
         tableX + cols.slice(0, idx).reduce((s, c) => s + c.w, 0)
 
       // Cabeçalho da tabela
-      doc.setFillColor('#1A3A2D') // verde mais escuro que o header para contraste
+      doc.setFillColor(MRV_COLORS.greenDark)
       doc.rect(tableX, y, tableW, rowH + 1, 'F')
       doc.setTextColor(MRV_COLORS.white)
       doc.setFont('helvetica', 'bold')
-      doc.setFontSize(8.5)
-      cols.forEach((c, i) => doc.text(c.label, colX(i) + 3, y + 6.5))
+      doc.setFontSize(7.5)
+      cols.forEach((c, i) => doc.text(c.label, colX(i) + 2, y + 6.5))
       y += rowH + 1
 
       // Linhas de dados
@@ -240,55 +253,72 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
         doc.setFillColor(statusHex(status))
         doc.rect(tableX, y, 2.5, rowH, 'F')
 
+        // KPI name
+        doc.setFont('helvetica', 'bold')
         doc.setTextColor(MRV_COLORS.gray)
-        doc.setFontSize(8.5)
-        doc.text(kpi.name, colX(0) + 5, y + 6, { maxWidth: cols[0].w - 7 })
-
-        // Grupo: Cluster vs Comercial (heurística: peso >= 20 e id in ro/mb → Cluster)
-        const grupo = ['ro', 'mb', 'nps'].includes(kpi.id) ? 'Cluster' : 'Comercial'
         doc.setFontSize(7.5)
+        doc.text(kpi.name, colX(0) + 4, y + 6, { maxWidth: cols[0].w - 6 })
+
+        // Grupo
+        const grupo = ['ro', 'mb', 'nps'].includes(kpi.id) ? 'Cluster' : 'Comercial'
+        doc.setFont('helvetica', 'normal')
+        doc.setFontSize(7)
         doc.setTextColor('#888888')
-        doc.text(grupo, colX(1) + 3, y + 6)
+        doc.text(grupo, colX(1) + 2, y + 6)
 
-        doc.setFontSize(8.5)
+        // Peso
+        doc.setFontSize(7.5)
         doc.setTextColor(MRV_COLORS.gray)
-        doc.text(fmtPeso(kpi.peso), colX(2) + 3, y + 6)
-        doc.text(`${kpi.gatilho}%`, colX(3) + 3, y + 6)
+        doc.text(fmtPeso(kpi.peso), colX(2) + 2, y + 6)
 
-        // Realização: negrito e colorida pelo status
+        // Gatilho
+        doc.text(`${kpi.gatilho}%`, colX(3) + 2, y + 6)
+
+        // Meta (metaLabel)
+        doc.setTextColor('#444444')
+        doc.text(kpi.metaLabel ?? '—', colX(4) + 2, y + 6, { maxWidth: cols[4].w - 3 })
+
+        // Realizado (realizadoLabel)
+        doc.text(kpi.realizadoLabel ?? '—', colX(5) + 2, y + 6, { maxWidth: cols[5].w - 3 })
+
+        // Realização % simulada: negrito e colorida pelo status
         doc.setFont('helvetica', 'bold')
         doc.setTextColor(statusHex(status))
-        doc.text(`${kpi.valor}%`, colX(4) + 3, y + 6)
+        doc.text(`${kpi.valor}%`, colX(6) + 2, y + 6)
 
-        // Badge de status
+        // Badge de status (col 7)
         const statusBg: Record<KPIStatus, string> = {
           below: '#FDECEA',
           range: '#E8F5E9',
           above: '#FFF3E0',
         }
         doc.setFillColor(statusBg[status])
-        doc.roundedRect(colX(5) + 2, y + 1.5, cols[5].w - 4, rowH - 3, 1.5, 1.5, 'F')
+        doc.roundedRect(colX(7) + 1, y + 1.5, cols[7].w - 2, rowH - 3, 1.5, 1.5, 'F')
         doc.setFont('helvetica', 'bold')
-        doc.setFontSize(7.5)
+        doc.setFontSize(6.5)
         doc.setTextColor(statusHex(status))
-        doc.text(getStatusLabel(status), colX(5) + (cols[5].w / 2), y + 6.2, { align: 'center' })
+        doc.text(
+          getStatusLabel(status),
+          colX(7) + cols[7].w / 2,
+          y + 6.2,
+          { align: 'center', maxWidth: cols[7].w - 3 },
+        )
 
         doc.setFont('helvetica', 'normal')
         y += rowH
       })
 
       // Linha de total
-      const { totalPeso } = summarize(kpis)
       doc.setFillColor(MRV_COLORS.greenSoft)
       doc.rect(tableX, y, tableW, rowH + 1, 'F')
       doc.setDrawColor(MRV_COLORS.green)
       doc.setLineWidth(0.5)
       doc.line(tableX, y, tableX + tableW, y)
       doc.setFont('helvetica', 'bold')
-      doc.setFontSize(9)
+      doc.setFontSize(8.5)
       doc.setTextColor(MRV_COLORS.green)
-      doc.text('Total ponderado', colX(0) + 5, y + 7)
-      doc.text(`${totalPeso.toFixed(1)}%`, colX(2) + 3, y + 7)
+      doc.text('Total ponderado', colX(0) + 4, y + 7)
+      doc.text(`${totalPeso.toFixed(1)}%`, colX(2) + 2, y + 7)
 
       addFooter(2, 3)
 
@@ -297,7 +327,6 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
       // ════════════════════════════════════════════════════════════════════════
       doc.addPage()
 
-      // Header
       doc.setFillColor(MRV_COLORS.green)
       doc.rect(0, 0, pageW, 22, 'F')
       doc.setFillColor(MRV_COLORS.orange)
@@ -313,9 +342,9 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
 
       // Três cartões de métricas lado a lado
       const cards = [
-        { label: 'KPIs Atingidos', value: String(pagos), color: MRV_COLORS.green, bg: MRV_COLORS.greenSoft },
-        { label: 'KPIs Não Atingidos', value: String(cortados), color: MRV_COLORS.red, bg: '#FDECEA' },
-        { label: 'Bônus Potencial', value: `${bonusPct.toFixed(1)}%`, color: MRV_COLORS.orange, bg: '#FFF3E0' },
+        { label: 'KPIs Atingidos',     value: String(pagos),              color: MRV_COLORS.green,  bg: MRV_COLORS.greenSoft },
+        { label: 'KPIs Não Atingidos', value: String(cortados),           color: MRV_COLORS.red,    bg: '#FDECEA' },
+        { label: 'Bônus Potencial',    value: `${bonusPct.toFixed(1)}%`,  color: MRV_COLORS.orange, bg: '#FFF3E0' },
       ] as const
 
       const cW = (pageW - mg * 2 - 16) / 3
@@ -327,7 +356,7 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
         doc.roundedRect(cX, cY, cW, cH, 3, 3, 'F')
         doc.setDrawColor(card.color)
         doc.setLineWidth(0.5)
-        doc.line(cX, cY, cX + cW, cY) // linha de topo colorida
+        doc.line(cX, cY, cX + cW, cY)
         doc.setFont('helvetica', 'normal')
         doc.setFontSize(8)
         doc.setTextColor('#666666')
@@ -338,13 +367,13 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
         doc.text(card.value, cX + cW / 2, cY + 32, { align: 'center' })
       })
 
-      // Indicadores por status (mini-tabela textual)
+      // Indicadores por status
       const statusGroups: { status: KPIStatus; label: string }[] = [
         { status: 'above', label: 'Acima da meta' },
         { status: 'range', label: 'Dentro da meta' },
         { status: 'below', label: 'Abaixo de meta' },
       ]
-      let gy = cY + cH + 18
+      let gy = cY + cH + 14
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(10)
       doc.setTextColor(MRV_COLORS.green)
@@ -354,7 +383,6 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
       statusGroups.forEach(({ status, label }) => {
         const items = kpis.filter(k => getStatus(k.valor, k.gatilho) === status)
         if (items.length === 0) return
-        // Título do grupo
         doc.setFillColor(statusHex(status))
         doc.rect(mg, gy, 3, 5.5, 'F')
         doc.setFont('helvetica', 'bold')
@@ -383,7 +411,6 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
       doc.setFontSize(18)
       doc.setTextColor(MRV_COLORS.white)
       doc.text(`${bonusPct.toFixed(1)}% do total`, mg + 10, pqY + 24)
-      // Resultado à direita
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(8.5)
       doc.setTextColor(MRV_COLORS.orange)
@@ -392,8 +419,9 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
         pageW - mg - 4, pqY + 17, { align: 'right' },
       )
 
-      // Rodapé páginas 1 e 3
+      // Rodapés das 3 páginas
       addFooter(1, 3)
+      addFooter(2, 3) // re-aplica para garantir página 2
       addFooter(3, 3)
 
       doc.save(`MRV_Metas_${today()}.pdf`)
@@ -415,18 +443,17 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
 
       // Rodapé padrão para slides internos
       function addSlideFooter(slide: PptxGenJS.Slide) {
-        slide.addText('MRV&CO  ·  Comercial Diretoria  ·  Ciclo 2026', {
-          x: MG, y: H - 0.38, w: W * 0.6, h: 0.3,
-          fontSize: 7.5, color: '#AAAAAA', align: 'left',
-        })
-        slide.addText(todayBR(), {
-          x: W - MG - 1.5, y: H - 0.38, w: 1.5, h: 0.3,
-          fontSize: 7.5, color: '#AAAAAA', align: 'right',
-        })
-        // linha divisória
         slide.addShape(pptx.ShapeType.line, {
           x: MG, y: H - 0.42, w: W - MG * 2, h: 0,
           line: { color: 'DDDDDD', width: 0.5 },
+        })
+        slide.addText('MRV&CO  ·  Comercial Diretoria  ·  Ciclo 2026', {
+          x: MG, y: H - 0.38, w: W * 0.6, h: 0.3,
+          fontSize: 7.5, color: 'AAAAAA', align: 'left',
+        })
+        slide.addText(todayBR(), {
+          x: W - MG - 1.5, y: H - 0.38, w: 1.5, h: 0.3,
+          fontSize: 7.5, color: 'AAAAAA', align: 'right',
         })
       }
 
@@ -438,43 +465,39 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
       // Metade esquerda: fundo verde
       cover.addShape(pptx.ShapeType.rect, {
         x: 0, y: 0, w: W * 0.55, h: H,
-        fill: { color: MRV_COLORS.green },
-        line: { color: MRV_COLORS.green, width: 0 },
+        fill: { color: MRV_COLORS.pGreen },
+        line: { color: MRV_COLORS.pGreen, width: 0 },
       })
       // Metade direita: fundo cinza claro
       cover.addShape(pptx.ShapeType.rect, {
         x: W * 0.55, y: 0, w: W * 0.45, h: H,
-        fill: { color: '#F2F2F2' },
-        line: { color: '#F2F2F2', width: 0 },
+        fill: { color: 'F2F2F2' },
+        line: { color: 'F2F2F2', width: 0 },
       })
-      // Barra laranja de sotaque no topo esquerdo
+      // Barra laranja no topo esquerdo
       cover.addShape(pptx.ShapeType.rect, {
         x: 0, y: 0, w: W * 0.55, h: 0.12,
-        fill: { color: MRV_COLORS.orange },
-        line: { color: MRV_COLORS.orange, width: 0 },
+        fill: { color: MRV_COLORS.pOrange },
+        line: { color: MRV_COLORS.pOrange, width: 0 },
       })
 
-      // Label eyebrow
       cover.addText('RELATÓRIO DE METAS  ·  CICLO 2026', {
         x: MG, y: 1.8, w: W * 0.5, h: 0.3,
-        fontSize: 8, bold: true, color: MRV_COLORS.orange,
+        fontSize: 8, bold: true, color: MRV_COLORS.pOrange,
         charSpacing: 2, align: 'left',
       })
-      // Título H1
       cover.addText('Painel de Metas\nComerciais', {
         x: MG, y: 2.2, w: W * 0.5, h: 1.9,
-        fontSize: 38, bold: true, color: MRV_COLORS.white, align: 'left',
+        fontSize: 38, bold: true, color: MRV_COLORS.pWhite, align: 'left',
         breakLine: true,
       })
-      // Subtítulo
       cover.addText('Comercial Diretoria', {
         x: MG, y: 4.35, w: W * 0.5, h: 0.45,
-        fontSize: 14, color: MRV_COLORS.white, transparency: 25, align: 'left',
+        fontSize: 14, color: MRV_COLORS.pWhite, transparency: 25, align: 'left',
       })
-      // Data
       cover.addText(`Gerado em ${todayBR()}`, {
         x: MG, y: 6.8, w: W * 0.5, h: 0.35,
-        fontSize: 9, color: MRV_COLORS.white, transparency: 45, align: 'left',
+        fontSize: 9, color: MRV_COLORS.pWhite, transparency: 45, align: 'left',
       })
 
       // Painel de bônus na coluna direita
@@ -482,11 +505,11 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
       const panelW = W * 0.45 - 1.2
       cover.addText('Bônus potencial estimado', {
         x: panelX, y: 1.8, w: panelW, h: 0.4,
-        fontSize: 10, color: '#888888', align: 'center',
+        fontSize: 10, color: '888888', align: 'center',
       })
       cover.addText(`${bonusPct.toFixed(1)}%`, {
         x: panelX, y: 2.3, w: panelW, h: 1.4,
-        fontSize: 72, bold: true, color: MRV_COLORS.green, align: 'center',
+        fontSize: 72, bold: true, color: MRV_COLORS.pGreen, align: 'center',
       })
       cover.addShape(pptx.ShapeType.line, {
         x: panelX + panelW * 0.1, y: 3.85, w: panelW * 0.8, h: 0,
@@ -494,81 +517,92 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
       })
       cover.addText(`${pagos} KPIs atingidos  ·  ${cortados} não atingidos`, {
         x: panelX, y: 4.05, w: panelW, h: 0.4,
-        fontSize: 10, color: '#666666', align: 'center',
+        fontSize: 10, color: '666666', align: 'center',
       })
-      // MRV&CO marca
       cover.addText('MRV&CO', {
         x: panelX, y: 6.7, w: panelW, h: 0.45,
-        fontSize: 18, bold: true, color: MRV_COLORS.orange, align: 'center',
+        fontSize: 18, bold: true, color: MRV_COLORS.pOrange, align: 'center',
       })
 
       // ════════════════════════════════════════════════════════════════════
-      // SLIDE 2 — DISTRIBUIÇÃO DE PESOS (visão de impacto)
+      // SLIDE 2 — DISTRIBUIÇÃO DE PESOS (barras horizontais + meta/realizado)
       // ════════════════════════════════════════════════════════════════════
       const dist = pptx.addSlide()
-      dist.background = { color: MRV_COLORS.white }
+      dist.background = { color: MRV_COLORS.pWhite }
 
-      // Header strip
       dist.addShape(pptx.ShapeType.rect, {
         x: 0, y: 0, w: W, h: 0.75,
-        fill: { color: MRV_COLORS.green },
-        line: { color: MRV_COLORS.green, width: 0 },
+        fill: { color: MRV_COLORS.pGreen },
+        line: { color: MRV_COLORS.pGreen, width: 0 },
       })
       dist.addShape(pptx.ShapeType.rect, {
         x: 0, y: 0, w: 0.18, h: 0.75,
-        fill: { color: MRV_COLORS.orange },
-        line: { color: MRV_COLORS.orange, width: 0 },
+        fill: { color: MRV_COLORS.pOrange },
+        line: { color: MRV_COLORS.pOrange, width: 0 },
       })
       dist.addText('Distribuição de Pesos por KPI', {
         x: 0.35, y: 0, w: W * 0.65, h: 0.75,
-        fontSize: 16, bold: true, color: MRV_COLORS.white, valign: 'middle',
+        fontSize: 16, bold: true, color: MRV_COLORS.pWhite, valign: 'middle',
       })
       dist.addText('Impacto de cada indicador no bônus total', {
         x: W * 0.65, y: 0, w: W * 0.35 - MG, h: 0.75,
-        fontSize: 9, color: MRV_COLORS.orange, valign: 'middle', align: 'right',
+        fontSize: 9, color: MRV_COLORS.pOrange, valign: 'middle', align: 'right',
       })
 
-      // Barras horizontais por KPI
-      const barStartY = 1.05
-      const barH = 0.48
-      const barGap = 0.14
-      const maxBarW = W - MG * 2 - 3.8 // espaço para label e valor
-      const labelW = 3.2
+      const barStartY = 1.0
+      const barH     = 0.52
+      const barGap   = 0.1
+      // Layout: [label KPI (2.6in)] [barra (4.8in)] [peso(0.6)] [status(1.4)] [meta/realiz (3.3in)]
+      const labelW   = 2.6
+      const maxBarW  = 4.8
+      const pesoW    = 0.65
+      const statusW  = 1.5
+      const infoX    = MG + labelW + maxBarW + pesoW + statusW + 0.2
+      const infoW    = W - infoX - MG
 
       kpis.forEach((kpi, i) => {
-        const status = getStatus(kpi.valor, kpi.gatilho)
-        const peso = kpi.peso ?? 0
-        const bY = barStartY + i * (barH + barGap)
-        const barFill = peso > 0 ? statusHex(status) : '#CCCCCC'
-        const barW = peso > 0 ? (peso / 25) * maxBarW : 0.15
+        const status  = getStatus(kpi.valor, kpi.gatilho)
+        const peso    = kpi.peso ?? 0
+        const bY      = barStartY + i * (barH + barGap)
+        const barFill = peso > 0 ? statusPptx(status) : 'CCCCCC'
+        const barW    = peso > 0 ? (peso / 25) * maxBarW : 0.15
 
         // Label KPI
         dist.addText(kpi.name, {
           x: MG, y: bY, w: labelW, h: barH,
-          fontSize: 9.5, color: MRV_COLORS.gray, valign: 'middle', align: 'left',
+          fontSize: 9, color: MRV_COLORS.pGray, valign: 'middle', align: 'left',
         })
-        // Barra fundo cinza (track)
+        // Track cinza
         dist.addShape(pptx.ShapeType.rect, {
-          x: MG + labelW, y: bY + barH * 0.28, w: maxBarW, h: barH * 0.44,
+          x: MG + labelW, y: bY + barH * 0.3, w: maxBarW, h: barH * 0.4,
           fill: { color: 'EEEEEE' }, line: { color: 'EEEEEE', width: 0 },
         })
         // Barra preenchida
         if (barW > 0) {
           dist.addShape(pptx.ShapeType.rect, {
-            x: MG + labelW, y: bY + barH * 0.28, w: barW, h: barH * 0.44,
+            x: MG + labelW, y: bY + barH * 0.3, w: barW, h: barH * 0.4,
             fill: { color: barFill }, line: { color: barFill, width: 0 },
           })
         }
-        // Valor do peso
+        // Peso %
         dist.addText(fmtPeso(kpi.peso), {
-          x: MG + labelW + maxBarW + 0.1, y: bY, w: 0.7, h: barH,
-          fontSize: 9.5, bold: true, color: barFill, valign: 'middle', align: 'left',
+          x: MG + labelW + maxBarW + 0.08, y: bY, w: pesoW, h: barH,
+          fontSize: 9, bold: true, color: barFill, valign: 'middle', align: 'left',
         })
         // Status tag
         dist.addText(getStatusLabel(status), {
-          x: MG + labelW + maxBarW + 0.85, y: bY + 0.06, w: 1.5, h: barH - 0.12,
-          fontSize: 7.5, bold: true, color: statusHex(status),
+          x: MG + labelW + maxBarW + pesoW + 0.08, y: bY + 0.05, w: statusW, h: barH - 0.1,
+          fontSize: 7.5, bold: true, color: statusPptx(status),
           valign: 'middle', align: 'center',
+        })
+        // Coluna Meta / Realizado
+        dist.addText(`Meta: ${kpi.metaLabel ?? '—'}`, {
+          x: infoX, y: bY, w: infoW, h: barH * 0.5,
+          fontSize: 7.5, color: '555555', valign: 'bottom', align: 'left',
+        })
+        dist.addText(`Realiz.: ${kpi.realizadoLabel ?? '—'}`, {
+          x: infoX, y: bY + barH * 0.5, w: infoW, h: barH * 0.5,
+          fontSize: 7.5, color: statusPptx(status), bold: true, valign: 'top', align: 'left',
         })
       })
 
@@ -580,73 +614,88 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
         { label: 'Abaixo de meta', status: 'below' },
       ]
       legendItems.forEach((item, i) => {
-        const lx = MG + i * 2.1
+        const lx = MG + i * 2.2
         dist.addShape(pptx.ShapeType.rect, {
-          x: lx, y: legendY + 0.06, w: 0.25, h: 0.25,
-          fill: { color: statusHex(item.status) },
-          line: { color: statusHex(item.status), width: 0 },
+          x: lx, y: legendY + 0.06, w: 0.22, h: 0.22,
+          fill: { color: statusPptx(item.status) },
+          line: { color: statusPptx(item.status), width: 0 },
         })
         dist.addText(item.label, {
-          x: lx + 0.32, y: legendY, w: 1.7, h: 0.38,
-          fontSize: 8, color: '#666666', valign: 'middle',
+          x: lx + 0.3, y: legendY, w: 1.8, h: 0.38,
+          fontSize: 8, color: '666666', valign: 'middle',
         })
       })
 
       addSlideFooter(dist)
 
       // ════════════════════════════════════════════════════════════════════
-      // SLIDE 3 — TABELA DETALHADA
+      // SLIDE 3 — TABELA DETALHADA (com Meta e Realizado)
       // ════════════════════════════════════════════════════════════════════
       const tbl = pptx.addSlide()
-      tbl.background = { color: MRV_COLORS.white }
+      tbl.background = { color: MRV_COLORS.pWhite }
 
-      // Header strip
       tbl.addShape(pptx.ShapeType.rect, {
         x: 0, y: 0, w: W, h: 0.75,
-        fill: { color: MRV_COLORS.green },
-        line: { color: MRV_COLORS.green, width: 0 },
+        fill: { color: MRV_COLORS.pGreen },
+        line: { color: MRV_COLORS.pGreen, width: 0 },
       })
       tbl.addShape(pptx.ShapeType.rect, {
         x: 0, y: 0, w: 0.18, h: 0.75,
-        fill: { color: MRV_COLORS.orange },
-        line: { color: MRV_COLORS.orange, width: 0 },
+        fill: { color: MRV_COLORS.pOrange },
+        line: { color: MRV_COLORS.pOrange, width: 0 },
       })
       tbl.addText('Visão Geral das Metas', {
         x: 0.35, y: 0, w: W * 0.65, h: 0.75,
-        fontSize: 16, bold: true, color: MRV_COLORS.white, valign: 'middle',
+        fontSize: 16, bold: true, color: MRV_COLORS.pWhite, valign: 'middle',
       })
-      tbl.addText('KPIs · Pesos · Realizações · Status', {
+      tbl.addText('KPIs · Pesos · Meta · Realizado · Status', {
         x: W * 0.65, y: 0, w: W * 0.35 - MG, h: 0.75,
-        fontSize: 9, color: MRV_COLORS.orange, valign: 'middle', align: 'right',
+        fontSize: 9, color: MRV_COLORS.pOrange, valign: 'middle', align: 'right',
+      })
+
+      const hdrOpts = (align: PptxGenJS.HAlign = 'center'): PptxGenJS.TableCellProps => ({
+        bold: true,
+        color: MRV_COLORS.pWhite,
+        fill: { color: MRV_COLORS.pGreenDark },
+        align,
+        valign: 'middle',
+        fontSize: 9,
       })
 
       const headerCells: PptxGenJS.TableCell[] = [
-        { text: 'KPI', options: { bold: true, color: MRV_COLORS.white, fill: { color: '#1A3A2D' }, align: 'left', valign: 'middle', fontSize: 10 } },
-        { text: 'Grupo', options: { bold: true, color: MRV_COLORS.white, fill: { color: '#1A3A2D' }, align: 'center', valign: 'middle', fontSize: 10 } },
-        { text: 'Peso', options: { bold: true, color: MRV_COLORS.white, fill: { color: '#1A3A2D' }, align: 'center', valign: 'middle', fontSize: 10 } },
-        { text: 'Gatilho', options: { bold: true, color: MRV_COLORS.white, fill: { color: '#1A3A2D' }, align: 'center', valign: 'middle', fontSize: 10 } },
-        { text: 'Realização', options: { bold: true, color: MRV_COLORS.white, fill: { color: '#1A3A2D' }, align: 'center', valign: 'middle', fontSize: 10 } },
-        { text: 'Status', options: { bold: true, color: MRV_COLORS.white, fill: { color: '#1A3A2D' }, align: 'center', valign: 'middle', fontSize: 10 } },
+        { text: 'KPI',        options: hdrOpts('left') },
+        { text: 'Grupo',      options: hdrOpts() },
+        { text: 'Peso',       options: hdrOpts() },
+        { text: 'Gatilho',    options: hdrOpts() },
+        { text: 'Meta',       options: hdrOpts() },
+        { text: 'Realizado',  options: hdrOpts() },
+        { text: 'Realiz. %',  options: hdrOpts() },
+        { text: 'Status',     options: hdrOpts() },
       ]
 
       const bodyRows: PptxGenJS.TableRow[] = kpis.map((kpi, idx) => {
-        const status = getStatus(kpi.valor, kpi.gatilho)
-        const rowFill = { color: idx % 2 === 1 ? 'F7F7F7' : MRV_COLORS.white }
-        const base: PptxGenJS.TableCellProps = { fill: rowFill, valign: 'middle', fontSize: 10, color: MRV_COLORS.gray }
+        const status  = getStatus(kpi.valor, kpi.gatilho)
+        const rowFill = { color: idx % 2 === 1 ? 'F7F7F7' : MRV_COLORS.pWhite }
+        const base: PptxGenJS.TableCellProps = {
+          fill: rowFill, valign: 'middle', fontSize: 9, color: MRV_COLORS.pGray,
+        }
         const grupo = ['ro', 'mb', 'nps'].includes(kpi.id) ? 'Cluster' : 'Comercial'
         return [
-          { text: kpi.name, options: { ...base, align: 'left', bold: true } },
-          { text: grupo, options: { ...base, align: 'center', color: '#888888', fontSize: 9 } },
-          { text: fmtPeso(kpi.peso), options: { ...base, align: 'center' } },
-          { text: `${kpi.gatilho}%`, options: { ...base, align: 'center' } },
-          { text: `${kpi.valor}%`, options: { ...base, align: 'center', bold: true, color: statusHex(status) } },
-          { text: getStatusLabel(status), options: { ...base, align: 'center', bold: true, color: statusHex(status) } },
+          { text: kpi.name,                    options: { ...base, align: 'left', bold: true } },
+          { text: grupo,                        options: { ...base, align: 'center', color: '888888', fontSize: 8 } },
+          { text: fmtPeso(kpi.peso),            options: { ...base, align: 'center' } },
+          { text: `${kpi.gatilho}%`,            options: { ...base, align: 'center' } },
+          { text: kpi.metaLabel ?? '—',         options: { ...base, align: 'center', color: '444444' } },
+          { text: kpi.realizadoLabel ?? '—',    options: { ...base, align: 'center', color: statusPptx(status) } },
+          { text: `${kpi.valor}%`,              options: { ...base, align: 'center', bold: true, color: statusPptx(status) } },
+          { text: getStatusLabel(status),       options: { ...base, align: 'center', bold: true, color: statusPptx(status) } },
         ]
       })
 
       tbl.addTable([headerCells, ...bodyRows], {
-        x: MG, y: 0.95, w: W - MG * 2,
-        colW: [3.8, 1.3, 1.1, 1.1, 1.4, 1.98],
+        x: MG, y: 0.9, w: W - MG * 2,
+        // KPI(3.0) Grupo(1.0) Peso(0.85) Gatilho(0.85) Meta(1.4) Realizado(1.4) Realiz%(0.9) Status(1.28) = 10.68 → ajustado para w=12.23
+        colW: [3.0, 1.0, 0.85, 0.85, 1.55, 1.55, 0.9, 1.48],
         rowH: 0.44,
         border: { type: 'solid', color: 'EEEEEE', pt: 0.5 },
         autoPage: false,
@@ -655,52 +704,47 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
       addSlideFooter(tbl)
 
       // ════════════════════════════════════════════════════════════════════
-      // SLIDE 4 — RESUMO EXECUTIVO (fundo verde, impacto alto)
+      // SLIDE 4 — RESUMO EXECUTIVO (fundo verde, impacto visual alto)
       // ════════════════════════════════════════════════════════════════════
       const exec = pptx.addSlide()
-      exec.background = { color: MRV_COLORS.green }
+      exec.background = { color: MRV_COLORS.pGreen }
 
-      // Barra laranja no topo
       exec.addShape(pptx.ShapeType.rect, {
         x: 0, y: 0, w: W, h: 0.12,
-        fill: { color: MRV_COLORS.orange },
-        line: { color: MRV_COLORS.orange, width: 0 },
+        fill: { color: MRV_COLORS.pOrange },
+        line: { color: MRV_COLORS.pOrange, width: 0 },
       })
 
-      // Eyebrow
       exec.addText('RESUMO EXECUTIVO', {
         x: MG, y: 0.5, w: W - MG * 2, h: 0.35,
-        fontSize: 8, bold: true, color: MRV_COLORS.orange,
+        fontSize: 8, bold: true, color: MRV_COLORS.pOrange,
         charSpacing: 2, align: 'left',
       })
       exec.addText('Bônus Potencial Estimado', {
         x: MG, y: 0.9, w: W * 0.65, h: 0.75,
-        fontSize: 26, bold: true, color: MRV_COLORS.white, align: 'left',
+        fontSize: 26, bold: true, color: MRV_COLORS.pWhite, align: 'left',
       })
 
-      // Número grande centralizado
       exec.addText(`${bonusPct.toFixed(1)}%`, {
         x: 0, y: 1.7, w: W, h: 2.0,
-        fontSize: 96, bold: true, color: MRV_COLORS.white, align: 'center',
+        fontSize: 96, bold: true, color: MRV_COLORS.pWhite, align: 'center',
       })
       exec.addText('do bônus potencial total', {
         x: 0, y: 3.65, w: W, h: 0.45,
-        fontSize: 13, color: MRV_COLORS.white, transparency: 25, align: 'center',
+        fontSize: 13, color: MRV_COLORS.pWhite, transparency: 25, align: 'center',
       })
 
-      // Linha divisória
       exec.addShape(pptx.ShapeType.line, {
         x: W * 0.2, y: 4.25, w: W * 0.6, h: 0,
         line: { color: 'FFFFFF', width: 0.5, transparency: 60 },
       })
 
-      // Três métricas abaixo
       const metrics = [
-        { label: 'KPIs\nAtingidos', value: String(pagos), color: MRV_COLORS.white },
-        { label: 'KPIs Não\nAtingidos', value: String(cortados), color: MRV_COLORS.red },
-        { label: 'Bônus\nEstimado', value: `${bonusPct.toFixed(1)}%`, color: MRV_COLORS.orange },
+        { label: 'KPIs\nAtingidos',    value: String(pagos),             color: MRV_COLORS.pWhite },
+        { label: 'KPIs Não\nAtingidos', value: String(cortados),         color: MRV_COLORS.pRed   },
+        { label: 'Bônus\nEstimado',    value: `${bonusPct.toFixed(1)}%`, color: MRV_COLORS.pOrange },
       ]
-      const mW = 2.8
+      const mW   = 2.8
       const mGap = (W - MG * 2 - metrics.length * mW) / (metrics.length - 1)
       metrics.forEach((m, i) => {
         const mx = MG + i * (mW + mGap)
@@ -710,15 +754,14 @@ export default function ExportButton({ kpis, scenarioName = 'Cenário atual' }: 
         })
         exec.addText(m.label, {
           x: mx, y: 5.42, w: mW, h: 0.6,
-          fontSize: 10, color: MRV_COLORS.white, transparency: 30,
+          fontSize: 10, color: MRV_COLORS.pWhite, transparency: 30,
           align: 'center', breakLine: true,
         })
       })
 
-      // Rodapé da capa executiva
       exec.addText('Documento de uso interno  ·  MRV&CO  ·  Ciclo 2026', {
         x: MG, y: H - 0.38, w: W - MG * 2, h: 0.3,
-        fontSize: 7.5, color: MRV_COLORS.white, transparency: 50, align: 'center',
+        fontSize: 7.5, color: MRV_COLORS.pWhite, transparency: 50, align: 'center',
       })
 
       await pptx.writeFile({ fileName: `MRV_Metas_${today()}.pptx` })
